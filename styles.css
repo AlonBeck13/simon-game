@@ -1,53 +1,78 @@
-body {
-  text-align: center;
-  background-color: #011F3F;
+var buttonArray = ["red", "blue", "green", "yellow"];
+var gamePattern = [];
+var userClickedPattern = [];
+var level = 0;
+var started = false;
+var curpressed = 0;
+
+
+$(document).keypress(function(){
+    if (!started){
+        $("#level-title").text("Level " + level);
+        nextSequence();
+        started = true;
+    }
+})
+
+$(".btn").click(function(){
+    var userChosenColore = $(this).attr("id");
+    userClickedPattern.push(userChosenColore);
+    playSound(userChosenColore);
+    animatePress(userChosenColore);
+    checkAnswer(curpressed);
+    curpressed++;
+})
+
+function checkAnswer(currentLevel){
+    if (gamePattern[currentLevel] === userClickedPattern[currentLevel]){
+        console.log('success');
+        if (userClickedPattern.length === gamePattern.concat.length){
+            userClickedPattern = [];
+            curpressed = 0;
+            setTimeout(function(){
+                nextSequence();
+            }, 1000);
+        }
+    }
+    else{
+        console.log("wrong");
+        playSound("wrong");
+        $("body").addClass("game-over");
+        setTimeout(function() {
+            $("body").removeClass("game-over");
+        }, 200)
+        $("#level-title").text("Game Over, Press Any Key to Restart");
+        startOver();
+    }
 }
 
-#level-title {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 3rem;
-  margin:  5%;
-  color: #FEF2BF;
+
+function nextSequence(){
+    level++;
+    $("#level-title").text("Level " + level);
+    var randomNuber = Math.floor(Math.random() * 4);
+    var randomChosenColore = buttonArray[randomNuber];
+    gamePattern.push(randomChosenColore);
+    $("#"+randomChosenColore).fadeIn(100).fadeOut(100).fadeIn(100);
+    playSound(randomChosenColore);
+    curpressed = 0;
 }
 
-.container {
-  display: block;
-  width: 50%;
-  margin: auto;
-
+function animatePress(currentColore){
+    $("#"+currentColore).addClass("pressed");
+    setTimeout(function() {
+        $("#"+currentColore).removeClass("pressed");
+    }, 100);
 }
 
-.btn {
-  margin: 25px;
-  display: inline-block;
-  height: 200px;
-  width: 200px;
-  border: 10px solid black;
-  border-radius: 20%;
+function playSound(name){
+    var sound = new Audio("sounds/"+name+".mp3")
+    sound.play(); 
 }
 
-.game-over {
-  background-color: red;
-  opacity: 0.8;
-}
-
-.red {
-  background-color: red;
-}
-
-.green {
-  background-color: green;
-}
-
-.blue {
-  background-color: blue;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
-.pressed {
-  box-shadow: 0 0 20px white;
-  background-color: grey;
+function startOver(){
+    level = 0;
+    gamePattern = [];
+    started = false;
+    userClickedPattern = [];
 }
